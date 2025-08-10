@@ -46,7 +46,7 @@ module tqvp_example (
     reg rnd_next;
 
     wire [1:0] seed_addr;
-    assign seed_addr = (address[1:0] - 1);
+    assign seed_addr = address[1:0] - 1;
 
     wire [31:0] seed_data;
     assign seed_data = data_in;
@@ -60,12 +60,10 @@ module tqvp_example (
         if (!rst_n) begin
             rnd_next <= 1;
         end else begin
-            if (address == 6'h0) begin
-                if ((data_read_n == 2'b10) && !rnd_next) begin
-                    rnd_next <= 1;
-                end else begin
-                    rnd_next <= 0;
-                end
+            if ((address == 6'h0) && (data_read_n == 2'b10) && !rnd_next) begin
+                rnd_next <= 1;
+            end else begin
+                rnd_next <= 0;
             end
         end
     end
