@@ -11,15 +11,15 @@ You can also include images in this folder and reference them in the markdown. E
 512 kb in size, and the combined size of all images must be less than 1 MB.
 -->
 
-# Your project title
+# xoshiro128++ pseudorandom number generator
 
-Author: Your Name
+Author: Ciro Cattuto
 
 Peripheral index: nn
 
 ## What it does
 
-Explain what your peripheral does and how it works
+The peripheral implements the pseudorandom number genetor [xoshiro128++ PRNG](https://prng.di.unimi.it/xoshiro128plusplus.c). Reading register RND (0x00) yields the current value of the generator and triggers computation of the next value, which completes in 1 clock cycle. The peripheral can generate one new pseudorandom number per clock cycle. The internal state of the random number generator (4 32-bit words) can be set using registers S0, S1, S2 and S3. After writing to any of these registers, a dummy read of register RND is necessary before reading the first pseudorandom number of the new sequence.
 
 ## Register map
 
@@ -27,12 +27,16 @@ Document the registers that are used to interact with your peripheral
 
 | Address | Name  | Access | Description                                                         |
 |---------|-------|--------|---------------------------------------------------------------------|
-| 0x00    | DATA  | R/W    | A word of data                                                      |
+| 0x00    | RND   | R      | Next 32-bit pseudorandom number                                     |
+| 0x01    | S0    | W      | Write RNG state word S0                                             |
+| 0x02    | S1    | W      | Write RNG state word S1                                             |
+| 0x03    | S2    | W      | Write RNG state word S2                                             |
+| 0x04    | S3    | W      | Write RNG state word S3                                             |
 
 ## How to test
 
-Explain how to use your project
+Read register RND right after boot. It should yield 0xFEF316C3. Read the same register to generate new pseudorandom numbers.
 
 ## External hardware
 
-List external hardware used in your project (e.g. PMOD, LED display, etc), if any
+No external hardware required.

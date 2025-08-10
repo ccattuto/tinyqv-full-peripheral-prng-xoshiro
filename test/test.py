@@ -32,46 +32,34 @@ async def test_project(dut):
 
     dut._log.info("Test project behavior")
 
-    # Test register write and read back
-    await tqv.write_word_reg(0, 0x82345678)
-    assert await tqv.read_byte_reg(0) == 0x78
-    assert await tqv.read_hword_reg(0) == 0x5678
-    assert await tqv.read_word_reg(0) == 0x82345678
+    # check the 1st generated pseudo-random number
+    rnd = await tqv.read_word_reg(0)
+    assert rnd == 0xFEF316C3
 
-    # Set an input value, in the example this will be added to the register value
-    dut.ui_in.value = 30
+    # check the 2nd generated pseudo-random number
+    rnd = await tqv.read_word_reg(0)
+    assert rnd == 0xBFC92848
 
-    # Wait for two clock cycles to see the output values, because ui_in is synchronized over two clocks,
-    # and a further clock is required for the output to propagate.
-    await ClockCycles(dut.clk, 3)
+    # set RNG state registers to 0
+    await tqv.write_word_reg(1, 0)
+    await tqv.write_word_reg(2, 0)
+    await tqv.write_word_reg(3, 0)
+    await tqv.write_word_reg(4, 0)
 
-    # The following assersion is just an example of how to check the output values.
-    # Change it to match the actual expected output of your module:
-    assert dut.uo_out.value == 0x96
+    # force update
+    await tqv.read_word_reg(0)
+    # confirm that the generated number is 0
+    rnd = await tqv.read_word_reg(0)
+    assert rnd == 0
 
-    # Input value should be read back from register 1
-    assert await tqv.read_byte_reg(4) == 30
+    # set RNG state registers to original hardcoded values
+    await tqv.write_word_reg(1, 0x0D1929D2)
+    await tqv.write_word_reg(2, 0x491DFB74)
+    await tqv.write_word_reg(3, 0x473E5E7D)
+    await tqv.write_word_reg(4, 0xD6CA8A07)
 
-    # Zero should be read back from register 2
-    assert await tqv.read_word_reg(8) == 0
-
-    # A second write should work
-    await tqv.write_word_reg(0, 40)
-    assert dut.uo_out.value == 70
-
-    # Test the interrupt, generated when ui_in[6] goes high
-    dut.ui_in[6].value = 1
-    await ClockCycles(dut.clk, 1)
-    dut.ui_in[6].value = 0
-
-    # Interrupt asserted
-    await ClockCycles(dut.clk, 3)
-    assert await tqv.is_interrupt_asserted()
-
-    # Interrupt doesn't clear
-    await ClockCycles(dut.clk, 10)
-    assert await tqv.is_interrupt_asserted()
-    
-    # Write bottom bit of address 8 high to clear
-    await tqv.write_byte_reg(8, 1)
-    assert not await tqv.is_interrupt_asserted()
+    # force update
+    await tqv.read_word_reg(0)
+    # confirm first generated pseudo-random number
+    rnd = await tqv.read_word_reg(0)
+    assert rnd == 0xFEF316C3
