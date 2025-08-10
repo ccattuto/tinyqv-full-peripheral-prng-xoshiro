@@ -19,7 +19,7 @@ Peripheral index: nn
 
 ## What it does
 
-The peripheral implements the pseudorandom number genetor [xoshiro128++ PRNG](https://prng.di.unimi.it/xoshiro128plusplus.c). Reading register RND (0x00) yields the current value of the generator and triggers computation of the next value, which completes in 1 clock cycle. The peripheral can generate one new pseudorandom number per clock cycle. The internal state of the random number generator (4 32-bit words) can be set using registers S0, S1, S2 and S3. After writing to any of these registers, a dummy read of register RND is necessary before reading the first pseudorandom number of the new sequence.
+The peripheral implements the pseudorandom number genetor [xoshiro128++ PRNG](https://prng.di.unimi.it/xoshiro128plusplus.c). Reading register RND (0x00) yields the current value of the generator and triggers computation of the next value, which completes in 1 clock cycle. The peripheral can generate one new pseudorandom number per clock cycle. The internal state of the random number generator (4 32-bit words) can be set using registers S0, S1, S2 and S3. After writing to any of these registers, a dummy read of register RND is necessary before reading the first pseudorandom number of the new sequence. Only supports 32-bit reads and writes.
 
 ## Register map
 
