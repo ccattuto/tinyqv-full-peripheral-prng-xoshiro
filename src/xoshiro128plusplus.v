@@ -1,5 +1,5 @@
 // xoshiro128++ (32-bit)
-// Implements: https://prng.di.unimi.it/xoshiro128plusplus.c
+// Implements xoshiro128++ by David Blackman and Sebastiano Vigna: https://prng.di.unimi.it/xoshiro128plusplus.c
 // See also: https://prng.di.unimi.it/
 
 module xoshiro128plusplus (
@@ -8,7 +8,6 @@ module xoshiro128plusplus (
 
     input  wire        next,
     output reg  [31:0] rnd,
-    output reg         valid,
 
     input  wire        write,
     input  wire [1:0]  write_addr,
@@ -27,7 +26,7 @@ module xoshiro128plusplus (
         end
     endfunction
 
-    // Combinational next-state math from https://prng.di.unimi.it/xoshiro128plusplus.c
+    // Combinational next-state math (https://prng.di.unimi.it/xoshiro128plusplus.c)
     wire [31:0] result_cur = rotl32(s0 + s3, 5'd7) + s0;
     wire [31:0] t          = s1 << 9;
 
@@ -56,10 +55,8 @@ module xoshiro128plusplus (
             s2 <= 32'h473E5E7D;
             s3 <= 32'hD6CA8A07;
             rnd <= 0;
-            valid <= 0;
         end else begin
             if (write) begin
-                valid <= 0;
                 case (write_addr)
                     2'd0: s0 <= write_data;
                     2'd1: s1 <= write_data;
@@ -73,7 +70,6 @@ module xoshiro128plusplus (
                 s1 <= n1;
                 s2 <= n2;
                 s3 <= n3;
-                valid <= 1;
             end
         end
     end
