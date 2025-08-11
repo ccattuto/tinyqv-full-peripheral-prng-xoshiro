@@ -36,7 +36,6 @@ module tqvp_example (
         .rst_n(rst_n),
         .rnd(rnd),
         .next(rnd_next),
-        .valid(rnd_valid),
         .write(seed_write),
         .write_addr(seed_addr),
         .write_data(seed_data)
@@ -51,8 +50,7 @@ module tqvp_example (
     wire [31:0] seed_data;
     assign seed_data = data_in;
 
-    wire rnd_valid;
-
+    // driven high iff 0x01 <= address <= 0x04 and host is writing a 32-bit word
     wire seed_write;
     assign seed_write = ((address > 0) && (address <= 4) && (data_write_n == 2'b10)) ? 1 : 0;
 
@@ -60,6 +58,7 @@ module tqvp_example (
         if (!rst_n) begin
             rnd_next <= 1;
         end else begin
+            // if reading a 32-bit word from register 0x00, trigger computation of next state
             if ((address == 6'h0) && (data_read_n == 2'b10) && !rnd_next) begin
                 rnd_next <= 1;
             end else begin
@@ -68,7 +67,7 @@ module tqvp_example (
         end
     end
 
-    // Address 0 reads the example data register.  
+    // Address 0 reads the current pseudorandom word.  
     // All other addresses read 0.
     assign data_out = (address == 6'h0) ? rnd : 32'h0;
 
@@ -79,8 +78,6 @@ module tqvp_example (
     assign user_interrupt = 0;
 
     // List all unused inputs to prevent warnings
-    // data_read_n is unused as none of our behaviour depends on whether
-    // registers are being read.
-    wire _unused = &{ui_in, rnd_valid, 1'b0};
+    wire _unused = &{ui_in, 1'b0};
 
 endmodule
