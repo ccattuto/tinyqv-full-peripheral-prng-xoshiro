@@ -48,7 +48,7 @@ module xoshiro128plusplus (
     wire [31:0] n2 = b2;
     wire [31:0] n3 = b3;
 
-    always @(posedge clk) begin
+    always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             s0 <= 32'h0D1929D2;
             s1 <= 32'h491DFB74;
