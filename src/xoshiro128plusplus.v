@@ -14,20 +14,6 @@ module xoshiro128plusplus (
     input  wire [31:0] write_data
 );
 
-    localparam [31:0] SEED0 = 32'h0D1929D2;
-    localparam [31:0] SEED1 = 32'h491DFB74;
-    localparam [31:0] SEED2 = 32'h473E5E7D;
-    localparam [31:0] SEED3 = 32'hD6CA8A07;
-
-    reg        setup;
-    reg [1:0]  setup_addr;
-
-    wire write_i = setup ? 1'b1 : write;
-    wire [1:0] write_addr_i = setup ? setup_addr : write_addr;
-    wire [31:0] write_data_i = setup ? (setup_addr==2'd0 ? SEED0 :
-                                        setup_addr==2'd1 ? SEED1 :
-                                        setup_addr==2'd2 ? SEED2 : SEED3) : write_data;
-
     // Internal state s[0..3]
     reg [31:0] s0, s1, s2, s3;
 
@@ -42,7 +28,7 @@ module xoshiro128plusplus (
 
     // Combinational next-state math (https://prng.di.unimi.it/xoshiro128plusplus.c)
     wire [31:0] result_cur = rotl32(s0 + s3, 5'd7) + s0;
-    wire [31:0] t          = s1 << 9;
+    wire [31:0] t = s1 << 9;
 
     wire [31:0] a0 = s0;
     wire [31:0] a1 = s1;
@@ -62,24 +48,13 @@ module xoshiro128plusplus (
     wire [31:0] n2 = b2;
     wire [31:0] n3 = b3;
 
-    always @(posedge clk or negedge rst_n) begin
+    always @(posedge clk) begin
         if (!rst_n) begin
-            s0 <= 0;
-            s1 <= 0;
-            s2 <= 0;
-            s3 <= 0;
+            s0 <= 32'h0D1929D2;
+            s1 <= 32'h491DFB74;
+            s2 <= 32'h473E5E7D;
+            s3 <= 32'hD6CA8A07;
             rnd <= 0;
-            setup <= 1;
-            setup_addr <= 0;
-        end else if (setup) begin
-            case (write_addr_i)
-                2'd0: s0 <= write_data_i;
-                2'd1: s1 <= write_data_i;
-                2'd2: s2 <= write_data_i;
-                2'd3: s3 <= write_data_i;
-            endcase
-            setup_addr <= setup_addr + 2'd1;
-            if (setup_addr == 2'd3) setup <= 1'b0;
         end else begin
             if (write) begin
                 case (write_addr)
