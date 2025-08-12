@@ -14,12 +14,22 @@ module xoshiro128plusplus (
     input  wire [31:0] write_data
 );
 
+    localparam [31:0] SEED0 = 32'h0D1929D2;
+    localparam [31:0] SEED1 = 32'h491DFB74;
+    localparam [31:0] SEED2 = 32'h473E5E7D;
+    localparam [31:0] SEED3 = 32'hD6CA8A07;
+
+    reg        setup;
+    reg [1:0]  setup_addr;
+
+    wire write_i = setup ? 1'b1 : write;
+    wire [1:0] write_addr_i = setup ? setup_addr : write_addr;
+    wire [31:0] write_data_i = setup ? (setup_addr==2'd0 ? SEED0 :
+                                        setup_addr==2'd1 ? SEED1 :
+                                        setup_addr==2'd2 ? SEED2 : SEED3) : write_data;
+
     // Internal state s[0..3]
     reg [31:0] s0, s1, s2, s3;
-
-    // setup
-    reg setup;
-    reg [1:0] setup_addr;
 
     // Rotate-left helper
     function [31:0] rotl32;
@@ -62,15 +72,14 @@ module xoshiro128plusplus (
             setup <= 1;
             setup_addr <= 0;
         end else if (setup) begin
-            setup_addr <= setup_addr + 1;
-            setup <= (setup_addr == 2'b11) ? 0 : 1;
-            case (setup_addr)
-                2'd0: s0 <= 32'h0D1929D2;
-                2'd1: s1 <= 32'h491DFB74;
-                2'd2: s2 <= 32'h473E5E7D;
-                2'd3: s3 <= 32'hD6CA8A07;
-                default: ;
+            case (write_addr_i)
+                2'd0: s0 <= write_data_i;
+                2'd1: s1 <= write_data_i;
+                2'd2: s2 <= write_data_i;
+                2'd3: s3 <= write_data_i;
             endcase
+            setup_addr <= setup_addr + 2'd1;
+            if (setup_addr == 2'd3) setup <= 1'b0;
         end else begin
             if (write) begin
                 case (write_addr)
