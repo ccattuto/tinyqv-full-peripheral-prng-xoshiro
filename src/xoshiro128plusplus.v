@@ -17,6 +17,10 @@ module xoshiro128plusplus (
     // Internal state s[0..3]
     reg [31:0] s0, s1, s2, s3;
 
+    // setup
+    reg setup;
+    reg [1:0] setup_addr;
+
     // Rotate-left helper
     function [31:0] rotl32;
         input [31:0] x;
@@ -50,11 +54,23 @@ module xoshiro128plusplus (
 
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            s0 <= 32'h2C981311;
-            s1 <= 32'hF012F489;
-            s2 <= 32'h4826A2A8;
-            s3 <= 32'hC0910824;
+            s0 <= 0;
+            s1 <= 0;
+            s2 <= 0;
+            s3 <= 0;
             rnd <= 0;
+            setup <= 1;
+            setup_addr <= 0;
+        end else if (setup) begin
+            setup_addr <= setup_addr + 1;
+            setup <= (setup_addr == 2'b11) ? 0 : 1;
+            case (setup_addr)
+                2'd0: s0 <= 32'h0D1929D2;
+                2'd1: s1 <= 32'h491DFB74;
+                2'd2: s2 <= 32'h473E5E7D;
+                2'd3: s3 <= 32'hD6CA8A07;
+                default: ;
+            endcase
         end else begin
             if (write) begin
                 case (write_addr)

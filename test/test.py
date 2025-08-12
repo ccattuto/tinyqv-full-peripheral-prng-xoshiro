@@ -32,13 +32,17 @@ async def test_project(dut):
 
     dut._log.info("Test project behavior")
 
+    while True:
+        rnd = await tqv.read_word_reg(0)
+        if rnd != 0:
+            break
+
     # check the 1st generated pseudo-random number
-    rnd = await tqv.read_word_reg(0)
-    assert rnd == 0xC125AE07
+    assert rnd == 0xFEF316C3
 
     # check the 2nd generated pseudo-random number
     rnd = await tqv.read_word_reg(0)
-    assert rnd == 0x1CC88FDA
+    assert rnd == 0xBFC92848
 
     # set RNG state registers to 0
     await tqv.write_word_reg(1, 0)
