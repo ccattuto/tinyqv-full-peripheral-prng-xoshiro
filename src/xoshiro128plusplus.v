@@ -50,10 +50,10 @@ module xoshiro128plusplus (
 
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            s0 <= 32'h0D1929D2;
-            s1 <= 32'h491DFB74;
-            s2 <= 32'h473E5E7D;
-            s3 <= 32'hD6CA8A07;
+            s0 <= 32'h2C981311;
+            s1 <= 32'hF012F489;
+            s2 <= 32'h4826A2A8;
+            s3 <= 32'hC0910824;
             rnd <= 0;
         end else begin
             if (write) begin

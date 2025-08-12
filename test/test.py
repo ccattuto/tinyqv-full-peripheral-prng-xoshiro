@@ -34,11 +34,11 @@ async def test_project(dut):
 
     # check the 1st generated pseudo-random number
     rnd = await tqv.read_word_reg(0)
-    assert rnd == 0xFEF316C3
+    assert rnd == 0xC125AE07
 
     # check the 2nd generated pseudo-random number
     rnd = await tqv.read_word_reg(0)
-    assert rnd == 0xBFC92848
+    assert rnd == 0x1CC88FDA
 
     # set RNG state registers to 0
     await tqv.write_word_reg(1, 0)
